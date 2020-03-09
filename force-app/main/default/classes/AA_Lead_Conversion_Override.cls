@@ -33,9 +33,9 @@ public with sharing class AA_Lead_Conversion_Override{
     }
 
     @AuraEnabled
-    public static list<Contact> checkExistingAccounts(string leadEmail){
+    public static list<Contact> checkExistingAccounts(string leadEmail, ID accID){
         list<Contact> cons = new list<Contact>();
-        cons = [SELECT ID, Name, Email, Account.Id, Account.Name FROM Contact WHERE Email =: leadEmail];
+        cons = [SELECT ID, Name, Email, Account.Id, Account.Name FROM Contact WHERE Email =: leadEmail AND Id=: accID];
         return cons;
         }
  

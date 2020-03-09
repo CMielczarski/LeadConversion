@@ -187,7 +187,8 @@ export default class Leadconversionoverride extends LightningElement {
             this.inputReadOnly = false;
             selectedEvent = new CustomEvent('selected', { detail: {selectName, currentRecId}, });
             this.showResults = false;
-            checkExistingAccounts().then(
+            checkExistingAccounts({"accID" : this.selectRecordId,
+                                   "leadEmail" : this.rec.Email}).then(
                 result=>{
                         this.searchCons = result;
                         if(this.searchCons === undefined){
