@@ -1,0 +1,229 @@
+<template>
+    <template if:true={Spinner}>
+        <div id="spinnerId" class="slds-spinner_container">
+            <div class="slds-spinner--brand  slds-spinner slds-spinner--large" role="alert">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+            </div>
+        </div>
+    </template>
+    <template if:true={stopProcess}>
+        <lightning-formatted-text value="You may not proceed with the conversion.  The lead does not have a valid email address.  Please provide an email address before proceeding."></lightning-formatted-text>
+    </template>
+    <template if:false={stopProcess}>
+    <div style="background-color:white; height: 750px">
+        <template if:true={renderDone}>
+            <span style="font-size:16px"><lightning-formatted-text value="Convert "></lightning-formatted-text><lightning-formatted-text value={rec.Name}></lightning-formatted-text></span><br/>
+        <div>
+            <div style="background-color: #e6e6e6">
+                <lightning-formatted-text name="Acc" value="Account" style="font-size:18px"></lightning-formatted-text><br/>
+                <lightning-formatted-text value="Choose Existing"></lightning-formatted-text>
+                            <lightning-input read-only={inputReadOnly} data-id="userinput" label="Account" name="searchText" onchange={searchLookup} value={selectRecordName} class="leftspace"></lightning-input>
+                                <div if:true={showResults}>
+                                <div if:true={iconFlag}>
+                                    <span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right iconheight">
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name="utility:search" size="x-small" alternative-text="icon" ></lightning-icon>
+                                    </span> 
+                                </div>
+                                
+                                <div if:true={clearIconFlag}>
+                                    <button class="slds-input__icon slds-input__icon_right slds-button slds-button_icon iconheight" onclick={resetData}>
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name="utility:clear" size="x-small" alternative-text="icon" ></lightning-icon>
+                                        <span class="slds-assistive-text">Clear</span></button>
+                                </div>
+                                <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <template for:each={searchRecords} for:item="serecord">
+                                            <li role="presentation" class="slds-listbox__item" key={serecord.recId}>
+                                                
+                                                <div data-id={serecord.recId} data-name={serecord.recName} onclick={setSelectedRecord} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                                    <span class="slds-media__figure">
+                                                        <span class="slds-icon_container slds-icon-standard-account">
+                                                            <lightning-icon icon-name={iconName} class="slds-icon slds-icon slds-icon_small slds-icon-text-default" size="x-small"></lightning-icon>
+                                                        </span>
+                                                    </span>
+                                                    <span class="slds-media__body">
+                                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">{serecord.recName}</span>
+                                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{objectName} • {serecord.recName}</span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div> 
+                                <div if:true={messageFlag}>
+                                    No result found.
+                                </div>
+                                <div if:true={LoadingText}>
+                                    Loading...
+                                </div>
+                                </div>
+                            </div>
+            
+        
+            <div style="background-color: #e6e6e6">
+                <lightning-formatted-text name="Con" value="Contact" style="font-size: 18px;"></lightning-formatted-text>
+                <table>
+                    <tr>
+                        <td>
+                            <lightning-formatted-text value="Create New"></lightning-formatted-text>
+                            <br/>
+                            <lightning-input type="radio" value={newConFlag} class="rad" name="newCon" onclick={handleFormInputChange}></lightning-input>
+                            <br/>
+                            <br/>
+                            <lightning-formatted-text value={rec.Name} id="newInput" style="background-color:white"></lightning-formatted-text>
+                        </td>
+                        <td>
+                            <lightning-formatted-text value="Choose Existing"></lightning-formatted-text>
+                            <br/>
+                            <lightning-input type="radio" class="rad" value={existConFlag} name="existCon" onclick={handleFormInputChange}></lightning-input>
+                            <lightning-input read-only={inputReadOnly2} id="userinput2" label="Contact" name="searchText2" onchange={searchLookup} value={selectRecordName2} class="leftspace, rad"></lightning-input>
+                                <div if:true={showResults2}>
+                                <div if:true={iconFlag2}>
+                                    <span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right iconheight">
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name="utility:search" size="x-small" alternative-text="icon" ></lightning-icon>
+                                    </span> 
+                                </div>
+                                
+                                <div if:true={clearIconFlag2}>
+                                    <button class="slds-input__icon slds-input__icon_right slds-button slds-button_icon iconheight" onclick={resetData}>
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name="utility:clear" size="x-small" alternative-text="icon" ></lightning-icon>
+                                        <span class="slds-assistive-text">Clear</span></button>
+                                </div>
+                                <div id="listbox-id" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <template for:each={searchRecords2} for:item="serecord2">
+                                            <li role="presentation" class="slds-listbox__item" key={serecord2.recId}>
+                                                
+                                                <div data-id={serecord2.recId} data-name={serecord2.recName} onclick={setSelectedRecord} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                                    <span class="slds-media__figure">
+                                                        <span class="slds-icon_container slds-icon-standard-account">
+                                                            <lightning-icon icon-name={iconName2} class="slds-icon slds-icon slds-icon_small slds-icon-text-default" size="x-small"></lightning-icon>
+                                                        </span>
+                                                    </span>
+                                                    <span class="slds-media__body">
+                                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">{serecord2.recName}</span>
+                                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{objectName} • {serecord2.recName}</span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div> 
+                                <div if:true={messageFlag2}>
+                                    No result found.
+                                </div>
+                                <div if:true={LoadingText2}>
+                                    Loading...
+                                </div>
+                                </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        <table>
+            <tr>
+                <!--<td>
+                    <span style="color:red; font-weight:bold"><lightning-formatted-text value="*"></lightning-formatted-text></span><lightning-formatted-text value="Record Owner"></lightning-formatted-text><lightning-input read-only={inputReadOnly3} data-id="userinput3" name="searchText3" onchange={searchLookup} value={selectRecordName3} class="leftspace"></lightning-input>
+                                <div if:true={showResults3}>
+                                <div if:true={iconFlag3}>
+                                    <span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right iconheight">
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name="utility:search" size="x-small" alternative-text="icon" ></lightning-icon>
+                                    </span> 
+                                </div>
+                                
+                                <div if:true={clearIconFlag3}>
+                                    <button class="slds-input__icon slds-input__icon_right slds-button slds-button_icon iconheight" onclick={resetData}>
+                                        <lightning-icon class="slds-icon slds-icon slds-icon_small slds-icon-text-default" icon-name="utility:clear" size="x-small" alternative-text="icon" ></lightning-icon>
+                                        <span class="slds-assistive-text">Clear</span></button>
+                                </div>
+                                <div id="listbox-id-3" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
+                                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                        <template for:each={searchRecords3} for:item="serecord3">
+                                            <li role="presentation" class="slds-listbox__item" key={serecord3.recId}>
+                                                
+                                                <div data-id={serecord3.recId} data-name={serecord3.recName} onclick={setSelectedRecord} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                                    <span class="slds-media__figure">
+                                                        <span class="slds-icon_container slds-icon-standard-account">
+                                                            <lightning-icon icon-name={iconName3} class="slds-icon slds-icon slds-icon_small slds-icon-text-default" size="x-small"></lightning-icon>
+                                                        </span>
+                                                    </span>
+                                                    <span class="slds-media__body">
+                                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">{serecord3.recName}</span>
+                                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">{objectName} • {serecord3.recName}</span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div> 
+                                <div if:true={messageFlag3}>
+                                    No result found.
+                                </div>
+                                <div if:true={LoadingText3}>
+                                    Loading...
+                                </div>
+                                </div>
+                </td>-->
+                <td>
+                    <span style="color:red; font-weight:bold"><lightning-formatted-text value="*"></lightning-formatted-text></span><lightning-formatted-text value="Converted Status"></lightning-formatted-text>
+                    <br/>
+                    <select class="slds-select" name="status" onchange={handleFormInputChange} >
+                        <option value="None">--None--</option>
+                        <option value="Unassigned">Unassigned</option>
+                        <option value="Assigned (Converted)">Assigned (Converted)</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td>
+                    <lightning-button label="Convert" onclick={convert}></lightning-button>
+                </td>
+                <td>
+                    <lightning-button label="Cancel" onclick={cancel}></lightning-button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    </template>
+    </div>
+    </template>
+    <template if:true={openmodal}>
+        <div style="height: 640px;">
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                            <lightning-icon icon-name="utility:close" size="medium">
+                            </lightning-icon>
+                            <span class="slds-assistive-text">Close</span>
+                        </button>
+                        <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Your Lead has been converted.</h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                        <table>
+                            <tr>
+                                <template if:true={showAccBtn}>
+                                <td>
+                                    <lightning-button label="Open Account" onclick={openAccount}></lightning-button>
+                                </td>
+                                </template>
+                                <td>
+                                    <lightning-button label="Open Contact" onclick={openContact}></lightning-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Close" variant="neutral" onclick={closeModal}></lightning-button>&nbsp;&nbsp;&nbsp;&nbsp;
+                    </footer>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+        </template>
+</template>
