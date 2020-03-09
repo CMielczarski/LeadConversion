@@ -31,9 +31,16 @@ public with sharing class AA_Lead_Conversion_Override{
             recId = recIdTemp;
         }
     }
+
+    @AuraEnabled
+    public static list<Contact> checkExistingAccounts(string leadEmail){
+        list<Contact> cons = new list<Contact>();
+        cons = [SELECT ID, Name, Email, Account.Id, Account.Name FROM Contact WHERE Email =: leadEmail];
+        return cons;
+        }
  
     @AuraEnabled
-    public static string convertLead(ID leadId, ID accID, ID ctcID, string convStat){
+    public static string convertLead(ID leadId, ID accID, ID ctcID, string convStat, list<Contact> cons, integer choice){
         string response;
         ID conRecType = AA_UtilityClass.getsrsContact;
         try{

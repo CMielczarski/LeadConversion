@@ -3,7 +3,8 @@ import { LightningElement, api, track } from 'lwc';
 import getResults from '@salesforce/apex/AA_Lead_Conversion_Override.getResults';
 import convertLead from '@salesforce/apex/AA_Lead_Conversion_Override.convertLead';
 import getLead from '@salesforce/apex/AA_Lead_Conversion_Override.getLead';
- 
+import checkExistingAccounts from '@salesforce/apex/AA_Lead_Conversion_Override.checkExistingAccounts';
+
 export default class Leadconversionoverride extends LightningElement {
  
 @api recordId;
@@ -61,6 +62,10 @@ export default class Leadconversionoverride extends LightningElement {
 @api existConFlag = false;
 
 @api stopProcess = false;
+
+@api searchCons;
+@api showConChoices = false;
+@track consChoice = 0;
 
 @track openmodal = false;
 
@@ -173,6 +178,7 @@ export default class Leadconversionoverride extends LightningElement {
         var selectName = event.currentTarget.dataset.name;
         var selectedEvent;
         if(this.searchObject === 'Account'){
+            this.showConChoices = false;
             this.txtclassname =  'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click';
             this.iconFlag = false;
             this.clearIconFlag = true;
@@ -181,6 +187,22 @@ export default class Leadconversionoverride extends LightningElement {
             this.inputReadOnly = false;
             selectedEvent = new CustomEvent('selected', { detail: {selectName, currentRecId}, });
             this.showResults = false;
+            checkExistingAccounts().then(
+                result=>{
+                        this.searchCons = result;
+                        if(this.searchCons === undefined){
+                            console.log('No Search results.');
+                            }
+                        else{
+                            this.showConChoices = true;
+                            }
+                    }
+                    )
+                .catch(
+                    error=>{
+                        console.log('Error searching Account matches: ' + error.message);
+                    }
+                    );
             }
         else if(this.searchObject === 'Contact'){
             this.txtclassname2 =  'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click';
@@ -268,6 +290,14 @@ export default class Leadconversionoverride extends LightningElement {
         window.location.replace('\\' + this.recordId);
         }
 
+    get options() {
+            return [
+                { label: 'Proceed as normal.  Create new Contact or Append to existing based on choices made in Contact section below.', value: '1' },
+                { label: 'Add Contact as selected below, but request merge of the existing records so that the proper parent becomes the Account selected above.', value: '2' },
+                { label: 'Do Not Create/Update a Contact, just convert the Lead.  ***Skip the Contact section below ***.', value: '3' }
+            ];
+        }
+
     convert(){
         var proceed = true;
         
@@ -297,6 +327,8 @@ export default class Leadconversionoverride extends LightningElement {
                 var aId = this.selectRecordId;
                 var cId = this.selectRecordId2;
                 var convStat = this.convertedStatus;
+                var cons = this.searchCons;
+                var choice = this.consChoice;
 
                 if(aId === undefined || aId.length === 0){
                     aId = null;
@@ -307,11 +339,16 @@ export default class Leadconversionoverride extends LightningElement {
                 if(convStat === undefined || convStat.length === 0){
                     convStat = null;
                     }
+                if(cons === undefined){
+                    cons = null;
+                    }
 
                 convertLead({'leadId' : lId, 
                              'accID' : aId, 
                              'ctcID' : cId, 
-                             'convStat': convStat}).then(
+                             'convStat': convStat,
+                             'cons': cons,
+                             'choice' : choice}).then(
                         result=>{
                             var resp = result;
                             if(resp.includes('Lead successfully converted based on selections.')){

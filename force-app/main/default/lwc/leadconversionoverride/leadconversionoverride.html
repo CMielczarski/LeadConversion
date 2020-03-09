@@ -59,7 +59,39 @@
                                     Loading...
                                 </div>
                                 </div>
-                            </div>
+                    <div>
+                        <template if:true={showConChoices}>
+                            <lightning-formatted-text value="This Lead's email already exists, attached to the account(s) listed below: "></lightning-formatted-text>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <lightning-formatted-text>Contact Name</lightning-formatted-text>
+                                    </td>
+                                    <td>
+                                        <lightning-formatted-text>Account Name</lightning-formatted-text>
+                                    </td>
+                                </tr>
+                            <template for:each={searchCons} for:item="con">
+                                <tr key={con.Id}>
+                                    <td>
+                                        <lightning-formatted-text value={con.Name}></lightning-formatted-text>
+                                    </td>
+                                    <td>
+                                        <lightning-formatted-text value={con.Account.Name}></lightning-formatted-text>
+                                    </td>
+                                </tr>
+                            </template>
+                            </table>
+                            <lightning-formatted-text value="Please choose how to proceed based on the following options:"></lightning-formatted-text>
+                                <lightning-radio-group
+                                    options={options}
+                                    value={consChoice}
+                                    type="radio">
+
+                                </lightning-radio-group>
+                        </template>
+                    </div>
+                </div>
             
         
             <div style="background-color: #e6e6e6">
