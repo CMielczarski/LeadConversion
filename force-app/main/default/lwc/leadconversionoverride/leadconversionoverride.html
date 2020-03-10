@@ -65,10 +65,10 @@
                             <table>
                                 <tr>
                                     <td>
-                                        <lightning-formatted-text>Contact Name</lightning-formatted-text>
+                                        <lightning-formatted-text value="Contact Name"></lightning-formatted-text>
                                     </td>
                                     <td>
-                                        <lightning-formatted-text>Account Name</lightning-formatted-text>
+                                        <lightning-formatted-text value="Account Name"></lightning-formatted-text>
                                     </td>
                                 </tr>
                             <template for:each={searchCons} for:item="con">
@@ -87,13 +87,13 @@
                                     options={options}
                                     value={consChoice}
                                     type="radio">
-
                                 </lightning-radio-group>
                         </template>
                     </div>
                 </div>
             
-        
+            <br/>
+            <br/>
             <div style="background-color: #e6e6e6">
                 <lightning-formatted-text name="Con" value="Contact" style="font-size: 18px;"></lightning-formatted-text>
                 <table>
@@ -244,9 +244,11 @@
                                     <lightning-button label="Open Account" onclick={openAccount}></lightning-button>
                                 </td>
                                 </template>
+                                <template if:true={showCtcBtn}>
                                 <td>
                                     <lightning-button label="Open Contact" onclick={openContact}></lightning-button>
                                 </td>
+                                </template>
                             </tr>
                         </table>
                     </div>

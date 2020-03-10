@@ -48,8 +48,11 @@ public with sharing class AA_Lead_Conversion_Override{
 
     @AuraEnabled
     public static list<Contact> checkExistingAccounts(string leadEmail, ID accID){
+        system.debug('leadEmail: ' + leadEmail);
+        system.debug('accID: ' + accID);
         list<Contact> cons = new list<Contact>();
-        cons = [SELECT ID, Name, Email, Account.Id, Account.Name FROM Contact WHERE Email =: leadEmail AND Id=: accID];
+        cons = [SELECT ID, Name, Email, Account.Id, Account.Name FROM Contact WHERE Email =: leadEmail AND Account.Id =: accID];
+        system.debug('cons: ' + cons);
         return cons;
         }
  
@@ -166,7 +169,42 @@ public with sharing class AA_Lead_Conversion_Override{
             lc.setLeadId(l.id);
             LeadStatus convertStatus = [select id,ApiName from LeadStatus where isConverted=true limit 1];
             lc.setConvertedStatus(convertStatus.ApiName);
-            lc.setContactId(c.Id);
+            if(choice != 3){
+                lc.setContactId(c.Id);
+                }
+            
+            if(choice == 2){
+                c.Merge_Master__c = true;
+                c.Merge_Requested__c = true;
+                c.Merge_Requested_With_ID__c = c.Id;
+                c.Merge_Request_With_Name__c = c.Name;
+                c.Merge_Approved__c = true;
+                c.Merge_requested_by__c = UserInfo.getName();
+                update c;
+                list<ID> consIDs = new list<ID>();
+                for(Contact cnc: cons){
+                    consIDs.add(cnc.Id);
+                    }
+                for(Contact ctc : [SELECT ID, Name, Merge_Requested__c, Merge_Requested_With_ID__c, Merge_Request_With_Name__c, Merge_requested_by__c FROM Contact WHERE ID In: consIDs]){
+                        ctc.Merge_Requested__c = true;
+                        ctc.Merge_Requested_With_ID__c = c.Id;
+                        ctc.Merge_Request_With_Name__c = c.Name;
+                        ctc.Merge_requested_by__c = UserInfo.getName();
+                        update ctc;
+                        Approval.ProcessSubmitRequest req = new Approval.ProcessSubmitRequest();
+                    
+                        req.setComments('A Merge has Been Requested for the following items.  ' +
+                                        'New master item: ' + c.Name 
+                                        + '.  Merged Record: ' + ctc.Name + '.  ' +
+                                        'Please review the items and approve or reject the request so it can be processed.');
+                        req.setObjectId(ctc.ID);
+                        //req.setSubmitterId(system.Userinfo.getUserId());
+                        system.debug('reqCheck'+req);
+                        // submit the approval request for processing
+                        system.debug('Submitting Contact approval');
+                        Approval.ProcessResult rslt = Approval.process(req);
+                        }
+                }
             lc.setAccountId(a.Id);
             lc.setConvertedStatus('Assigned');
             Database.LeadConvertResult lcr = Database.convertLead(lc);

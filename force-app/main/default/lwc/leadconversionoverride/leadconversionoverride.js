@@ -72,8 +72,11 @@ export default class Leadconversionoverride extends LightningElement {
 
 @api convConID;
 @api showAccBtn = false;
+@api showCtcBtn = false;
  
     connectedCallback(){
+        this.Spinner = true;
+        this.showCtcBtn = true;
         console.log("Check record ID: " + this.recordId);
         getLead({"recordId" : this.recordId})
             .then(
@@ -86,11 +89,13 @@ export default class Leadconversionoverride extends LightningElement {
                     else{
                         this.stopProcess = true;
                         }
+                        this.Spinner = false;
                     }
                 )
             .catch(
                 error=>{
                     console.log('Error: ' + error.message);
+                    this.Spinner = false;
                     }
                 );
         }
@@ -379,18 +384,20 @@ export default class Leadconversionoverride extends LightningElement {
 
     get options() {
             return [
-                { label: 'Proceed as normal.  Create new Contact or Append to existing based on choices made in Contact section below.', value: '1' },
-                { label: 'Add Contact as selected below, but request merge of the existing records so that the proper parent becomes the Account selected above.', value: '2' },
-                { label: 'Do Not Create/Update a Contact, just convert the Lead.  ***Skip the Contact section below if choosing this option.***', value: '3' }
+                { label: 'Proceed as normal.  Create new Contact or Append to existing based on choices made in Contact section below.', value: 1 },
+                { label: 'Add Contact as selected below, but request merge of the existing records so that the proper parent becomes the Account selected above.', value: 2 },
+                { label: 'Do Not Create/Update a Contact, just convert the Lead.  ***Skip the Contact section below if choosing this option.***', value: 3 }
             ];
         }
 
     convert(){
         var proceed = true;
-        
+        this.Spinner = true;
+        console.log('consChoice: ' + this.consChoice);
         if(this.newConFlag === true && (this.selectRecordId === undefined || this.selectRecordId.length < 15)){
             proceed = false;
             alert('If creating a new Contact, an existing Account must be selected to attach it to.');
+            this.Spinner = false;
             }
         
         /*if(this.selectRecordId3 === undefined || this.selectRecordId3.length < 15){
@@ -398,13 +405,15 @@ export default class Leadconversionoverride extends LightningElement {
             alert('A record Owner Must be provided.');
             }*/
 
-        if(this.newConFlag === false && (this.existConFlag === false && (this.selectRecordId2 === undefined || this.selectRecordId2.length < 15))){
+        if((this.newConFlag === false && (this.existConFlag === false && (this.selectRecordId2 === undefined || this.selectRecordId2.length < 15))) && this.consChoice !== 3){
             proceed = false;
+            this.Spinner = false;
             alert('You must choose to either create a new contact or append to an existing contact.');
             }
  
         if(this.convertedStatus === '--None--'){
             proceed = false;
+            this.Spinner = false;
             alert('A Converted Status value must be selected from the list.');
             }
  
@@ -439,20 +448,26 @@ export default class Leadconversionoverride extends LightningElement {
                         result=>{
                             var resp = result;
                             if(resp.includes('Lead successfully converted based on selections.')){
+                                this.Spinner = false;
                                 this.convConID = resp.substring(58, resp.length);
                                 this.openmodal = true;
                                 if(this.selectRecordId !== undefined){
                                     this.showAccBtn = true;
                                     }
+                                if(this.consChoice === 3){
+                                    this.showCtcBtn = false;
+                                    }
                                 }
                             else{
                                 alert("Issue with the conversion process: " + resp);
+                                this.Spinner = false;
                                 }
                             }
                         )
                     .catch(
                         error=>{
                             alert('Error in conversion process: ' + error.message);
+                            this.Spinner = false;
                             }
                     );
                 }
