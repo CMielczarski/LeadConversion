@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
  
 import getResults from '@salesforce/apex/AA_Lead_Conversion_Override.getResults';
+import getResultsAlt from '@salesforce/apex/AA_Lead_Conversion_Override.getResultsAlt';
 import convertLead from '@salesforce/apex/AA_Lead_Conversion_Override.convertLead';
 import getLead from '@salesforce/apex/AA_Lead_Conversion_Override.getLead';
 import checkExistingAccounts from '@salesforce/apex/AA_Lead_Conversion_Override.checkExistingAccounts';
@@ -78,7 +79,8 @@ export default class Leadconversionoverride extends LightningElement {
             .then(
                 result=>{
                     this.rec = result;
-                    if(this.rec.email !== undefined && this.rec.email !== null && this.email.length > 2){
+                    console.log('Rec.email: ' + this.rec.Email);
+                    if(this.rec.Email !== undefined && this.rec.Email !== null && this.rec.Email.length > 2){
                         this.renderDone = true;
                         }
                     else{
@@ -110,7 +112,25 @@ export default class Leadconversionoverride extends LightningElement {
         this.searchTerm = event.target.value;
         console.log('Search Term: ' + this.searchTerm);
         this.Spinner = true;
-        getResults({"ObjectName" : this.searchObject, "fieldName" : this.searchField, "value" : this.searchTerm, "state" : this.rec.State})
+        var state = this.rec.State;
+        console.log('State for search: ' + state);
+        if(state === undefined || state.length < 1){
+            state = '.';
+            }
+        if(this.searchTerm.length >= 3){
+
+        if(this.searchObject === 'Account'){
+            console.log('Object Name: ' + this.searchObject);
+            console.log('SearchField: ' + this.searchField);
+            console.log('SearchTerm: ' + this.searchTerm);
+            console.log('State: ' + state);
+            getResultsAlt(
+                        {
+                        "ObjectName" : this.searchObject, 
+                        "fieldName" : this.searchField, 
+                        "value" : this.searchTerm,
+                        "state" : state
+                        })
             .then(
                 result=>{
                     console.log("Search Object: " + this.searchObject);
@@ -162,15 +182,80 @@ export default class Leadconversionoverride extends LightningElement {
                             this.clearIconFlag3 = false;
                             this.showResults3 = true;
                         }
-                        this.Spinner = false;;
+                        this.Spinner = false;
                     }
                 )
             .catch(
                 error=>{
                     alert("Error fetching results: " + error.message);
-                    this.Spinner = true;
+                    this.Spinner = false;
                     }
             );
+            }
+        else{
+        getResults({"ObjectName" : this.searchObject, "fieldName" : this.searchField, "value" : this.searchTerm})
+            .then(
+                result=>{
+                    console.log("Search Object: " + this.searchObject);
+                    if(this.searchObject === 'Account'){
+                        this.searchRecords = result;
+                        this.LoadingText = false;
+                        this.txtclassname =  result.length > 0 ? 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open' : 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click';
+                        if(this.searchTerm.length > 0 && result.length === 0) {
+                            this.messageFlag = true;
+                            this.showResults = true;
+                            }
+                        else {
+                            this.messageFlag = false;
+                            this.showResults = false;
+                            }
+                            this.iconFlag = true;
+                            this.clearIconFlag = false;
+                            this.showResults = true;
+                        }
+                    else if(this.searchObject === 'Contact'){
+                        this.searchRecords2 = result;
+                        this.LoadingText2 = false;
+                        this.txtclassname2 =  result.length > 0 ? 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open' : 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click';
+                        if(this.searchTerm.length > 0 && result.length === 0) {
+                            this.messageFlag2 = true;
+                            this.showResults2 = true;
+                            }
+                        else {
+                            this.messageFlag2 = false;
+                            this.showResults2 = false;
+                            }
+                            this.iconFlag2 = true;
+                            this.clearIconFlag2 = false;
+                            this.showResults2 = true;
+                        }
+                    else if(this.searchObject === 'User'){
+                        this.searchRecords3 = result;
+                        this.LoadingText3 = false;
+                        this.txtclassname3 =  result.length > 0 ? 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open' : 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click';
+                        if(this.searchTerm.length > 0 && result.length === 0) {
+                            this.messageFlag3 = true;
+                            this.showResults3 = true;
+                            }
+                        else {
+                            this.messageFlag3 = false;
+                            this.showResults3 = false;
+                            }
+                            this.iconFlag3 = true;
+                            this.clearIconFlag3 = false;
+                            this.showResults3 = true;
+                        }
+                        this.Spinner = false;
+                    }
+                )
+            .catch(
+                error=>{
+                    alert("Error fetching results: " + error.message);
+                    this.Spinner = false;
+                    }
+            );
+                }
+            }
         }
 
     setSelectedRecord(event) {
@@ -191,7 +276,8 @@ export default class Leadconversionoverride extends LightningElement {
                                    "leadEmail" : this.rec.Email}).then(
                 result=>{
                         this.searchCons = result;
-                        if(this.searchCons === undefined){
+                        console.log('Search Cons: ' + this.searchCons);
+                        if(this.searchCons === undefined || this.searchCons.length < 1){
                             console.log('No Search results.');
                             }
                         else{
@@ -295,7 +381,7 @@ export default class Leadconversionoverride extends LightningElement {
             return [
                 { label: 'Proceed as normal.  Create new Contact or Append to existing based on choices made in Contact section below.', value: '1' },
                 { label: 'Add Contact as selected below, but request merge of the existing records so that the proper parent becomes the Account selected above.', value: '2' },
-                { label: 'Do Not Create/Update a Contact, just convert the Lead.  ***Skip the Contact section below ***.', value: '3' }
+                { label: 'Do Not Create/Update a Contact, just convert the Lead.  ***Skip the Contact section below if choosing this option.***', value: '3' }
             ];
         }
 

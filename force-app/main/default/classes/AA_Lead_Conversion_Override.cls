@@ -1,22 +1,36 @@
 public with sharing class AA_Lead_Conversion_Override{
  
     @AuraEnabled(cacheable=true)
-    public static List<SObJectResult> getResults(String ObjectName, String fieldName, String value, string state) {
-        List<SObJectResult> sObjectResultList = new List<SObJectResult>();
+    public static List<SObjectResult> getResults(String ObjectName, String fieldName, String value) {
+        List<SObjectResult> sObjectResultList = new List<SObjectResult>();
         system.debug(fieldName+'-------------'+ObjectName+'---++----------'+value);
-        if(String.isNotEmpty(value))
-            if(ObjectName != 'Account'){
-                for(sObject so : Database.Query('Select Id,'+fieldName+' FROM '+ObjectName+' WHERE '+fieldName+' LIKE \'%' + value + '%\' ORDER BY '+fieldName+' LIMIT 200')) {
+        if(String.isNotEmpty(value)){
+            for(sObject so : Database.Query('Select Id,'+fieldName+' FROM '+ObjectName+' WHERE '+fieldName+' LIKE \'%' + value + '%\' ORDER BY '+fieldName+' LIMIT 200')) {
+                String fieldvalue = (String)so.get(fieldName);
+                sObjectResultList.add(new SObjectResult(fieldvalue, so.Id));
+                }
+            }
+        return sObjectResultList;
+        }
+    
+    @AuraEnabled(cacheable=true)
+    public static List<SObjectResult> getResultsAlt(String ObjectName, String fieldName, String value, String ste) {
+        List<SObjectResult> sObjectResultList = new List<SObjectResult>();
+        system.debug(fieldName+'-------------'+ObjectName+'---++----------'+value);
+        if(String.isNotEmpty(value)){
+            if(String.isNotEmpty(ste) && ste != '.'){
+                for(sObject so : Database.Query('Select Id,'+fieldName+' FROM '+ObjectName+' WHERE State =:' +ste+ ' AND '+fieldName+' LIKE \'%' + value + '%\' ORDER BY '+fieldName+' LIMIT 200')) {
                     String fieldvalue = (String)so.get(fieldName);
                     sObjectResultList.add(new SObjectResult(fieldvalue, so.Id));
                     }
                 }
             else{
-                for(sObject so : Database.Query('Select Id,'+fieldName+' FROM '+ObjectName+' WHERE State =:' +state+ ' AND '+fieldName+' LIKE \'%' + value + '%\' ORDER BY '+fieldName+' LIMIT 200')) {
+                for(sObject so : Database.Query('Select Id,'+fieldName+' FROM '+ObjectName+' WHERE '+fieldName+' LIKE \'%' + value + '%\' ORDER BY '+fieldName+' LIMIT 200')) {
                     String fieldvalue = (String)so.get(fieldName);
                     sObjectResultList.add(new SObjectResult(fieldvalue, so.Id));
                     }
                 }
+            }
         return sObjectResultList;
         }
     
